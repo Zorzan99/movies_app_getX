@@ -1,8 +1,17 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 import 'package:moviesapp/application/ui/filmes_app_icons.dart';
+import 'package:moviesapp/models/movie_model.dart';
 
 class MovieCard extends StatelessWidget {
-  const MovieCard({super.key});
+  final dateFormat = DateFormat('y');
+  final MovieModel movies;
+  MovieCard({
+    Key? key,
+    required this.movies,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +32,7 @@ class MovieCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     clipBehavior: Clip.antiAlias,
                     child: Image.network(
-                      'https://upload.wikimedia.org/wikipedia/pt/6/63/Joker_%282019%29.jpg',
+                      movies.posterPath,
                       width: 148,
                       height: 184,
                       fit: BoxFit.cover,
@@ -33,18 +42,22 @@ class MovieCard extends StatelessWidget {
                 const SizedBox(
                   height: 20,
                 ),
-                const Text(
-                  'Coringa',
+                Text(
+                  movies.title,
                   maxLines: 2,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Text(
-                  '2019',
-                  style: TextStyle(
+                Text(
+                  dateFormat.format(
+                    DateTime.parse(
+                      movies.releaseDate,
+                    ),
+                  ),
+                  style: const TextStyle(
                     fontSize: 11,
                     color: Colors.grey,
                     fontWeight: FontWeight.w300,
