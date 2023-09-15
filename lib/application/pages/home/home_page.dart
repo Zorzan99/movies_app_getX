@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get_core/get_core.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:moviesapp/application/pages/favorites/favorites_binding.dart';
 import 'package:moviesapp/application/pages/favorites/favorites_page.dart';
 import 'package:moviesapp/application/pages/home/home_controller.dart';
 import 'package:moviesapp/application/pages/movies/movies_binding.dart';
@@ -51,6 +52,7 @@ class HomePage extends GetView<HomeController> {
             return GetPageRoute(
               settings: settings,
               page: () => const FavoritesPage(),
+              binding: FavoritesBinding(),
             );
           }
           return null;

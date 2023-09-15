@@ -1,5 +1,9 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:moviesapp/application/rest_client/rest_client.dart';
+import 'package:moviesapp/models/movie_detail_model.dart';
 import 'package:moviesapp/models/movie_model.dart';
 
 import './movies_repository.dart';
@@ -55,5 +59,65 @@ class MoviesRepositoryImpl implements MoviesRepository {
       throw Exception('Erro ao buscar popular movies');
     }
     return result.body ?? <MovieModel>[];
+  }
+
+  @override
+  Future<MovieDetailModel?> getDetail(int id) async {
+    final result = await _restClient.get<MovieDetailModel?>(
+      '/movie/$id',
+      query: {
+        'api_key': FirebaseRemoteConfig.instance.getString('api_token'),
+        'language': 'pt-br',
+        'append_to_response': 'images,credits',
+        'include_image_language': 'en,pt-br'
+      },
+      decoder: (data) {
+        return MovieDetailModel.fromMap(data);
+      },
+    );
+    if (result.hasError) {
+      print('Erro ao buscar detalhes do filme ${result.statusText}');
+      throw Exception('Erro ao buscar popular movies');
+    }
+    return result.body;
+  }
+
+  @override
+  Future<void> addOrRemoveFavorite(String userId, MovieModel movie) async {
+    try {
+      var favoriteCollection = FirebaseFirestore.instance
+          .collection('favorities')
+          .doc(userId)
+          .collection('movies');
+
+      if (movie.favorite) {
+        favoriteCollection.add(movie.toMap());
+      } else {
+        var favoriteData = await favoriteCollection
+            .where('id', isEqualTo: movie.id)
+            .limit(1)
+            .get();
+
+        favoriteData.docs.first.reference.delete();
+      }
+    } catch (e, s) {
+      log('Erro ao favotirar filme', error: e, stackTrace: s);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<MovieModel>> getFavoritesMovies(String userId) async {
+    var favoritesMovies = await FirebaseFirestore.instance
+        .collection('favorities')
+        .doc(userId)
+        .collection('movies')
+        .get();
+
+    final listFavorites = <MovieModel>[];
+    for (var movie in favoritesMovies.docs) {
+      listFavorites.add(MovieModel.fromMap(movie.data()));
+    }
+    return listFavorites;
   }
 }
